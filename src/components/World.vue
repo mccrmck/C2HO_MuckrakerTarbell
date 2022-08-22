@@ -10,12 +10,13 @@ import * as THREE from "three";
 
 <script>
 let renderer, scene, camera;
+const numParticles = 100;
 let mouseX = 0;
 let mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
-let cameraMoveSpeed = 0.1;
-let parallaxCoeff = 0.05;
+const cameraMoveSpeed = 0.1;
+const parallaxCoeff = 0.05;
 let parameters;
 let materials = [];
 export default {
@@ -51,7 +52,7 @@ export default {
       const sprite4 = textureLoader.load("snowflake1.png");
       const sprite5 = textureLoader.load("snowflake1.png");
 
-      for (let i = 0; i < 10000; i++) {
+      for (let i = 0; i < numParticles; i++) {
         const x = Math.random() * 2000 - 1000;
         const y = Math.random() * 2000 - 1000;
         const z = Math.random() * 2000 - 1000;
@@ -64,13 +65,7 @@ export default {
         new THREE.Float32BufferAttribute(vertices, 3)
       );
 
-      parameters = [
-        [[1.0, 0.2, 0.5], sprite2, 20],
-        [[0.95, 0.1, 0.5], sprite3, 15],
-        [[0.9, 0.05, 0.5], sprite1, 10],
-        [[0.85, 0, 0.5], sprite5, 8],
-        [[0.8, 0, 0.5], sprite4, 5],
-      ];
+      parameters = [[[1.0, 0.2, 0.5], sprite2, 20]];
 
       for (let i = 0; i < parameters.length; i++) {
         const color = parameters[i][0];
@@ -79,7 +74,7 @@ export default {
 
         materials[i] = new THREE.PointsMaterial({
           size: size,
-          map: sprite,
+          //   map: sprite,
           blending: THREE.AdditiveBlending,
           depthTest: false,
           transparent: true,
@@ -127,7 +122,6 @@ export default {
       window.addEventListener("resize", this.onWindowResize);
     },
     animate: function () {
-      //   console.log("animate");
       requestAnimationFrame(this.animate);
       this.renderScene();
     },
@@ -144,6 +138,12 @@ export default {
 
         if (object instanceof THREE.Points) {
           object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+          //   object.rotation.x =
+          //   object.rotation.y = time;
+          //   object.position.x += (Math.random() * 2 - 1) * 5;
+          //   object.position.y += (Math.random() * 2 - 1) * 5;
+          //   object.position.z += (Math.random() * 2 - 1) * 5;
+          //TODO: Points is a mesh that contains the vertices. We need to move the vertices and update the mesh.
         }
       }
 
