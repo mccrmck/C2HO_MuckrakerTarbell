@@ -102,7 +102,7 @@ export default {
         scene.add(sphere);
       }
 
-      const boxGeo = new THREE.BoxGeometry(200, 200, 200);
+      const boxGeo = new THREE.BoxGeometry(200, 200, 50);
       boxGeo.translate(0, 0, 0);
       const material = new THREE.MeshBasicMaterial({
         color: Math.floor(Math.random() * 16777215).toString(16),
