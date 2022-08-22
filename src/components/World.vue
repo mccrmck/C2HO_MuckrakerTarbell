@@ -16,7 +16,7 @@ let mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 const cameraMoveSpeed = 0.1;
-const parallaxCoeff = 0.05;
+const parallaxCoeff = 0.3;
 let parameters;
 let materials = [];
 export default {
