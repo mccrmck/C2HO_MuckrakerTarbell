@@ -16,25 +16,19 @@ let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 let cameraMoveSpeed = 0.1;
 let parallaxCoeff = 0.05;
+let parameters;
+let materials = [];
 export default {
   name: "World",
   data() {
-    return {
-      parameters: undefined,
-      materials: [],
-    };
+    return {};
   },
   mounted() {
     this.init();
     this.animate();
   },
   methods: {
-    counter: function () {
-      this.count++;
-    },
     init: function () {
-      console.log("init");
-
       camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
@@ -70,7 +64,7 @@ export default {
         new THREE.Float32BufferAttribute(vertices, 3)
       );
 
-      this.parameters = [
+      parameters = [
         [[1.0, 0.2, 0.5], sprite2, 20],
         [[0.95, 0.1, 0.5], sprite3, 15],
         [[0.9, 0.05, 0.5], sprite1, 10],
@@ -78,21 +72,21 @@ export default {
         [[0.8, 0, 0.5], sprite4, 5],
       ];
 
-      for (let i = 0; i < this.parameters.length; i++) {
-        const color = this.parameters[i][0];
-        const sprite = this.parameters[i][1];
-        const size = this.parameters[i][2];
+      for (let i = 0; i < parameters.length; i++) {
+        const color = parameters[i][0];
+        const sprite = parameters[i][1];
+        const size = parameters[i][2];
 
-        this.materials[i] = new THREE.PointsMaterial({
+        materials[i] = new THREE.PointsMaterial({
           size: size,
           map: sprite,
           blending: THREE.AdditiveBlending,
           depthTest: false,
           transparent: true,
         });
-        this.materials[i].color.setHSL(color[0], color[1], color[2]);
+        materials[i].color.setHSL(color[0], color[1], color[2]);
 
-        const particles = new THREE.Points(geometry, this.materials[i]);
+        const particles = new THREE.Points(geometry, materials[i]);
 
         particles.rotation.x = Math.random() * 6;
         particles.rotation.y = Math.random() * 6;
@@ -102,23 +96,17 @@ export default {
       }
 
       //
-
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
       //
-
-      //
-
       document.body.style.touchAction = "none";
       document.body.addEventListener("pointermove", this.onPointerMove);
 
       //
-
       window.addEventListener("resize", this.onWindowResize);
-      console.log("init finished successfully");
     },
     animate: function () {
       //   console.log("animate");
@@ -141,11 +129,11 @@ export default {
         }
       }
 
-      for (let i = 0; i < this.materials.length; i++) {
-        const color = this.parameters[i][0];
+      for (let i = 0; i < materials.length; i++) {
+        const color = parameters[i][0];
 
         const h = ((360 * (color[0] + time)) % 360) / 360;
-        this.materials[i].color.setHSL(h, color[1], color[2]);
+        materials[i].color.setHSL(h, color[1], color[2]);
       }
 
       renderer.render(scene, camera);
