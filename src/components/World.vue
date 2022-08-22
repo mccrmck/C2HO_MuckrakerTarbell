@@ -89,14 +89,18 @@ export default {
 
         scene.add(particles);
       }
-
-      //
+      for (let i = 0; i < 3; i++) {
+        let sphereGeo = new THREE.SphereGeometry(200, 50, 50);
+        sphereGeo.translate(i * -200, 0, 0);
+        let material = new THREE.MeshBasicMaterial({ color: "#7a3d0b" });
+        let sphere = new THREE.Mesh(sphereGeo, material);
+        scene.add(sphere);
+      }
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      //
       document.body.style.touchAction = "none";
       document.body.addEventListener("pointermove", this.onPointerMove);
 
