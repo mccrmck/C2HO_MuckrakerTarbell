@@ -94,13 +94,27 @@ export default {
 
         scene.add(particles);
       }
+
+      const sphereX = [-400, -200, 300];
+      const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
+
       for (let i = 0; i < 3; i++) {
-        let sphereGeo = new THREE.SphereGeometry(200, 50, 50);
-        sphereGeo.translate(i * -200, 0, 0);
-        let material = new THREE.MeshBasicMaterial({ color: "#7a3d0b" });
+        let sphereGeo = new THREE.SphereGeometry(150, 50, 50, 0, spherePhi[i]);
+        sphereGeo.translate(sphereX[i], 0, 0);
+        let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
+        let material = new THREE.MeshBasicMaterial({ color: "#" + randCol() });
         let sphere = new THREE.Mesh(sphereGeo, material);
         scene.add(sphere);
       }
+
+      const boxGeo = new THREE.BoxGeometry(200, 200, 200);
+      boxGeo.translate(0, 0, 0);
+      const material = new THREE.MeshBasicMaterial({
+        color: Math.floor(Math.random() * 16777215).toString(16),
+      });
+      const cube = new THREE.Mesh(boxGeo, material);
+      scene.add(cube);
+
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
