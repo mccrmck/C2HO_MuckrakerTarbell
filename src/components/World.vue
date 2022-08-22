@@ -14,6 +14,8 @@ let mouseX = 0;
 let mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
+let cameraMoveSpeed = 0.1;
+let parallaxCoeff = 0.05;
 export default {
   name: "World",
   data() {
@@ -126,8 +128,8 @@ export default {
     renderScene: function () {
       const time = Date.now() * 0.00005;
 
-      camera.position.x += (mouseX - camera.position.x) * 0.05;
-      camera.position.y += (-mouseY - camera.position.y) * 0.05;
+      camera.position.x += (mouseX - camera.position.x) * cameraMoveSpeed;
+      camera.position.y += (-mouseY - camera.position.y) * cameraMoveSpeed;
 
       camera.lookAt(scene.position);
 
@@ -153,6 +155,8 @@ export default {
 
       mouseX = event.clientX - windowHalfX;
       mouseY = event.clientY - windowHalfY;
+      mouseX *= parallaxCoeff;
+      mouseY *= parallaxCoeff;
     },
     onWindowResize: function () {
       windowHalfX = window.innerWidth / 2;
@@ -169,8 +173,6 @@ export default {
 
 <style scoped>
 .wrapper {
-  /* width: 100vw; */
-  /* height: 100vh; */
   display: flex;
   flex-direction: column;
   justify-content: space-around;
