@@ -300,7 +300,7 @@ export default {
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-      this.addParticles();
+      // this.addParticles();
       this.addCCHO();
       this.addInstancedMesh();
       this.addLights();
@@ -351,7 +351,7 @@ export default {
 
     renderScene: function () {
       this.updateCamera();
-      this.updateParticles();
+      // this.updateParticles();
       this.updateMaterials();
       this.updateInstancedMesh();
 
