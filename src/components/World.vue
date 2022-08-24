@@ -30,6 +30,23 @@ export default {
     this.animate();
   },
   methods: {
+    addInstancedMesh: function () {
+      console.log("addInstancedMesh");
+
+      let count = 100;
+
+      let sphere = new THREE.SphereGeometry();
+
+      let metalMaterial = new THREE.MeshStandardMaterial({
+        metalness: 1,
+        roughness: 0,
+      });
+
+      instancedMesh = new THREE.InstancedMesh(sphere, metalMaterial, count);
+      instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+      scene.add(instancedMesh);
+    },
+
     addParticles: function () {
       console.log("addParticles");
       const geometry = new THREE.BufferGeometry();
@@ -73,11 +90,13 @@ export default {
         scene.add(particles);
       }
     },
+
     addCCHO: function () {
       console.log("addCCHO");
       this.addSpheres();
       this.addCube();
     },
+
     addSpheres: function () {
       console.log("addSpheres");
       const sphereX = [-400, -200, 300];
@@ -96,6 +115,7 @@ export default {
         scene.add(sphere);
       }
     },
+
     addCube: function () {
       console.log("addCube");
       const boxGeo = new THREE.BoxGeometry(
@@ -111,6 +131,7 @@ export default {
       const cube = new THREE.Mesh(boxGeo, material);
       scene.add(cube);
     },
+
     init: function () {
       camera = new THREE.PerspectiveCamera(
         75,
@@ -125,6 +146,7 @@ export default {
 
       this.addParticles();
       this.addCCHO();
+      this.addInstancedMesh();
 
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
@@ -137,15 +159,18 @@ export default {
       //
       window.addEventListener("resize", this.onWindowResize);
     },
+
     animate: function () {
       requestAnimationFrame(this.animate);
       this.renderScene();
     },
+
     updateCamera: function () {
       camera.position.x += (mouseX - camera.position.x) * cameraMoveSpeed;
       camera.position.y += (-mouseY - camera.position.y) * cameraMoveSpeed;
       camera.lookAt(scene.position);
     },
+
     updateParticles: function () {
       const time = Date.now() * 0.00005;
 
@@ -156,6 +181,7 @@ export default {
         }
       }
     },
+
     updateMaterials: function () {
       const time = Date.now() * 0.00005;
 
@@ -166,6 +192,7 @@ export default {
         materials[i].color.setHSL(h, color[1], color[2]);
       }
     },
+
     renderScene: function () {
       this.updateCamera();
       this.updateParticles();
@@ -173,6 +200,7 @@ export default {
 
       renderer.render(scene, camera);
     },
+
     onPointerMove: function (event) {
       if (event.isPrimary === false) return;
 
@@ -181,6 +209,7 @@ export default {
       mouseX *= parallaxCoeff;
       mouseY *= parallaxCoeff;
     },
+
     onWindowResize: function () {
       windowHalfX = window.innerWidth / 2;
       windowHalfY = window.innerHeight / 2;
