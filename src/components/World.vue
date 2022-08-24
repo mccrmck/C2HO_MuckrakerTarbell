@@ -267,6 +267,7 @@ export default {
       this.addParticles();
       this.addCCHO();
       this.addInstancedMesh();
+      this.addLights();
 
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
