@@ -87,17 +87,26 @@ export default {
         let sphereGeo = new THREE.SphereGeometry(150, 50, 50, 0, spherePhi[i]);
         sphereGeo.translate(sphereX[i], 0, 0);
         let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
-        let material = new THREE.MeshBasicMaterial({ color: "#" + randCol() });
+        let material = new THREE.MeshBasicMaterial({
+          color: "#" + randCol(),
+          transparent: true,
+          opacity: 1,
+        });
         let sphere = new THREE.Mesh(sphereGeo, material);
         scene.add(sphere);
       }
     },
     addCube: function () {
       console.log("addCube");
-      const boxGeo = new THREE.BoxGeometry(200, 200, 50);
-      boxGeo.translate(0, 0, 0);
+      const boxGeo = new THREE.BoxGeometry(
+        window.innerWidth * 0.15,
+        window.innerHeight * 0.25,
+        50
+      );
       const material = new THREE.MeshBasicMaterial({
         color: Math.floor(Math.random() * 16777215).toString(16),
+        transparent: true,
+        opacity: 1,
       });
       const cube = new THREE.Mesh(boxGeo, material);
       scene.add(cube);
@@ -176,7 +185,6 @@ export default {
       windowHalfX = window.innerWidth / 2;
       windowHalfY = window.innerHeight / 2;
 
-      // camera.zoom = (window.innerWidth / screen.width) ** 2;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
 
