@@ -169,6 +169,7 @@ export default {
       windowHalfX = window.innerWidth / 2;
       windowHalfY = window.innerHeight / 2;
 
+      camera.zoom = window.innerWidth / screen.availWidth;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
 
