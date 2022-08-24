@@ -10,6 +10,7 @@ import * as THREE from "three";
 
 <script>
 let renderer, scene, camera;
+let instancedMesh;
 const numParticles = 100;
 let mouseX = 0;
 let mouseY = 0;
@@ -29,6 +30,35 @@ export default {
     this.animate();
   },
   methods: {
+    addCCHO: function () {
+      console.log("addCCHO");
+      this.addSpheres();
+      this.addCube();
+    },
+    addSpheres: function () {
+      console.log("addSpheres");
+      const sphereX = [-400, -200, 300];
+      const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
+
+      for (let i = 0; i < 3; i++) {
+        let sphereGeo = new THREE.SphereGeometry(150, 50, 50, 0, spherePhi[i]);
+        sphereGeo.translate(sphereX[i], 0, 0);
+        let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
+        let material = new THREE.MeshBasicMaterial({ color: "#" + randCol() });
+        let sphere = new THREE.Mesh(sphereGeo, material);
+        scene.add(sphere);
+      }
+    },
+    addCube: function () {
+      console.log("addCube");
+      const boxGeo = new THREE.BoxGeometry(200, 200, 50);
+      boxGeo.translate(0, 0, 0);
+      const material = new THREE.MeshBasicMaterial({
+        color: Math.floor(Math.random() * 16777215).toString(16),
+      });
+      const cube = new THREE.Mesh(boxGeo, material);
+      scene.add(cube);
+    },
     init: function () {
       camera = new THREE.PerspectiveCamera(
         75,
@@ -44,14 +74,6 @@ export default {
       const geometry = new THREE.BufferGeometry();
       const vertices = [];
 
-      const textureLoader = new THREE.TextureLoader();
-
-      const sprite1 = textureLoader.load("snowflake1.png");
-      const sprite2 = textureLoader.load("snowflake1.png");
-      const sprite3 = textureLoader.load("snowflake1.png");
-      const sprite4 = textureLoader.load("snowflake1.png");
-      const sprite5 = textureLoader.load("snowflake1.png");
-
       for (let i = 0; i < numParticles; i++) {
         const x = Math.random() * 2000 - 1000;
         const y = Math.random() * 2000 - 1000;
@@ -65,7 +87,7 @@ export default {
         new THREE.Float32BufferAttribute(vertices, 3)
       );
 
-      parameters = [[[1.0, 0.2, 0.5], sprite2, 20]];
+      parameters = [[[1.0, 0.2, 0.5], "yo", 20]];
 
       for (let i = 0; i < parameters.length; i++) {
         const color = parameters[i][0];
@@ -90,31 +112,7 @@ export default {
         scene.add(particles);
       }
 
-      const sphereX = [-400, -200, 300];
-      const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
-      let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
-
-      for (let i = 0; i < 3; i++) {
-        let sphereGeo = new THREE.SphereGeometry(150, 50, 50, 0, spherePhi[i]);
-        sphereGeo.translate(sphereX[i], 0, 0);
-        let material = new THREE.MeshBasicMaterial({
-          color: "#" + randCol(),
-          transparent: true,
-          opacity: 1,
-        });
-        let sphere = new THREE.Mesh(sphereGeo, material);
-        scene.add(sphere);
-      }
-
-      const boxGeo = new THREE.BoxGeometry(200, 200, 50);
-      boxGeo.translate(0, 0, 0);
-      const boxMat = new THREE.MeshBasicMaterial({
-        color: "#" + randCol(),
-        transparent: true,
-        opacity: 1,
-      });
-      const cube = new THREE.Mesh(boxGeo, boxMat);
-      scene.add(cube);
+      this.addCCHO();
 
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
