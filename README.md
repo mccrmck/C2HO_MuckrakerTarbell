@@ -1,35 +1,17 @@
 # C2HO_MuckrakerTarbell
 
-This template should help get you started developing with Vue 3 in Vite.
+This is our submission for the Creative Computing Hub Oslo hackathon in 2022. It marks our first steps in WebGL and Three.js.
 
-## Recommended IDE Setup
+The 3D scene is wrapped into a Vue.js site, that lives [here](https://c2ho.netlify.app/).
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+# Build
 
-## Customize configuration
+First clone this repository.
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+Then build using:
 
-## Project Setup
-
-```sh
-npm install
 ```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+This should give you the built webapp in the `dist` folder.
