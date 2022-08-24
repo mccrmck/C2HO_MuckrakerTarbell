@@ -11,8 +11,9 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 3000;
+let instanceCount = 1000;
 let ambientLight, pointLight;
+let phongMaterial;
 let instanceTargetPosition = [0, 0, 0];
 let instancePositions = [];
 let instanceVelocities = [];
@@ -93,8 +94,8 @@ export default {
 
       let box = new THREE.BoxGeometry(10, 10, 10);
 
-      let phongMaterial = new THREE.MeshPhongMaterial({
-        color: 0x00a2ff,
+      phongMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
         shininess: 100,
         reflectivity: 1,
       });
@@ -110,9 +111,10 @@ export default {
 
     updateInstancedMesh: function () {
       const time = Date.now() * 0.0005;
-      const uForce = 4;
+      const uForce = 6;
       const uDamp = 0.9999;
-      const uMaxVel = 20;
+      const uMaxVel = 30;
+      const baseColor = [0.2, 1, 0.46];
       for (let i = 0; i < instanceCount; i++) {
         //update positions
         let [ix, iy, iz] = instancePositions[i];
@@ -139,19 +141,35 @@ export default {
         [ix, iy, iz] = instancePositions[i];
         // update instance velocities
         instanceVelocities[i] = [oVelocity.x, oVelocity.y, oVelocity.z];
-
-        // if (i == 0) {
-        //   console.log([oPosition.x, oPosition.y, oPosition.z]);
-        // }
-
+        // set position
         dummy.position.set(ix, iy, iz);
 
         // update rotations
         dummy.rotation.set(Math.cos(i + time), Math.sin(i + time), 0);
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(i, dummy.matrix);
+
+        // update colors
+        let [cx, cy, cz] = baseColor;
+        let baseColorVec = new THREE.Vector3(cx, cy, cz);
+        let oColor = baseColorVec.multiplyScalar(
+          oVelocity.length() ** 10.0 + 0.01
+        );
+        oColor = oColor.clamp(
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(255, 255, 255)
+        );
+
+        let instanceColor = new THREE.Color(
+          Math.round(oColor.x) / 255,
+          Math.round(oColor.y) / 255,
+          Math.round(oColor.z) / 255
+        );
+
+        instancedMesh.setColorAt(i, instanceColor);
       }
       instancedMesh.instanceMatrix.needsUpdate = true;
+      instancedMesh.instanceColor.needsUpdate = true;
     },
 
     addParticles: function () {
