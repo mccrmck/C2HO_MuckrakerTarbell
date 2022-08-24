@@ -11,7 +11,7 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 1000;
+let instanceCount = 3000;
 let ambientLight, pointLight;
 let instanceTargetPosition = [0, 0, 0];
 let instancePositions = [];
@@ -112,21 +112,18 @@ export default {
       const time = Date.now() * 0.0005;
       const uForce = 4;
       const uDamp = 0.9999;
-      const uMaxVel = 10;
+      const uMaxVel = 20;
       for (let i = 0; i < instanceCount; i++) {
         //update positions
-
         let [ix, iy, iz] = instancePositions[i];
         const iPosition = new THREE.Vector3(ix, iy, iz);
         let [ux, uy, uz] = instanceTargetPosition;
         const uTarget = new THREE.Vector3(ux, uy, uz);
-
         let dir = uTarget.sub(iPosition);
         let normDir = dir.normalize();
         let dist = normDir.length();
         let acc = normDir.multiplyScalar(uForce);
         acc = acc.divideScalar(dist * 50 * (dist * 50) + 1.0);
-
         let [vx, vy, vz] = instanceVelocities[i];
         const iVelocity = new THREE.Vector3(vx, vy, vz);
         let oVelocity = iVelocity.add(acc);
@@ -136,6 +133,7 @@ export default {
         let maxVel = new THREE.Vector3(uMaxVel, uMaxVel, uMaxVel);
         oVelocity = oVelocity.clamp(minVel, maxVel);
         let oPosition = iPosition.add(oVelocity);
+
         // update instance position buffer
         instancePositions[i] = [oPosition.x, oPosition.y, oPosition.z];
         [ix, iy, iz] = instancePositions[i];
@@ -305,7 +303,7 @@ export default {
       this.addInstancedMesh();
       this.addLights();
 
-      renderer = new THREE.WebGLRenderer();
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
