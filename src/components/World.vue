@@ -68,8 +68,6 @@ export default {
       }
     },
     addLights: function () {
-      console.log("addLights");
-
       ambientLight = new THREE.AmbientLight(0xffffff);
       scene.add(ambientLight);
 
@@ -116,8 +114,6 @@ export default {
     },
 
     addInstancedMesh: function () {
-      console.log("addInstancedMesh");
-
       this.fillRandomInstancePositions();
       this.initInstanceVelocities();
 
@@ -209,7 +205,6 @@ export default {
     },
 
     addCCHO: function () {
-      console.log("addCCHO");
       this.addSphere();
       this.addTorus();
       this.addCube();
@@ -220,8 +215,6 @@ export default {
     },
 
     addTorus: function () {
-      console.log("addTorus");
-
       for (let i = 0; i < 2; i++) {
         const oKey = ["c1", "c2"][i];
         const torusGeo = new THREE.TorusGeometry(
@@ -260,7 +253,6 @@ export default {
     },
 
     addSphere: function () {
-      console.log("addSpheres");
       let sphereGeo = new THREE.SphereGeometry(130, 50, 50, 0);
       sphereGeo.translate(origins["o"][0], origins["o"][1], origins["o"][2]);
       let material = new THREE.MeshPhongMaterial({
@@ -274,7 +266,6 @@ export default {
     },
 
     addCube: function () {
-      console.log("addCube");
       const boxWidth = window.innerWidth * 0.05;
       const boxheight = window.innerHeight * 0.08;
 
