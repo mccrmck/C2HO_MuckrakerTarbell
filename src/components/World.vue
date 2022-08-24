@@ -11,7 +11,7 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 300;
+let instanceCount = 3000;
 let ambientLight, pointLight;
 let phongMaterial;
 let instanceTargetPosition = [0, 0, 0];
@@ -329,6 +329,29 @@ export default {
       }
     },
 
+    checkRadius: function (origin, radius = 150) {
+      const center = new THREE.Vector3(
+        origins["o"][0],
+        origins["o"][1],
+        Math.abs(origins["o"][2])
+      );
+      let red = new THREE.Color(1, 0, 0);
+      origin = center;
+
+      for (let i = 0; i < instanceCount; i++) {
+        const m = new THREE.Matrix4();
+        const v = new THREE.Vector3();
+        instancedMesh.getMatrixAt(i, m);
+        v.setFromMatrixPosition(m);
+        const distance = v.distanceTo(origin);
+
+        if (distance < radius) {
+          instancedMesh.setColorAt(i, red);
+        }
+      }
+      instancedMesh.instanceColor.needsUpdate = true;
+    },
+
     init: function () {
       camera = new THREE.PerspectiveCamera(
         75,
@@ -395,6 +418,7 @@ export default {
       // this.updateParticles();
       this.updateMaterials();
       this.updateInstancedMesh();
+      this.checkRadius();
 
       renderer.render(scene, camera);
     },
