@@ -118,18 +118,36 @@ export default {
 
     addCube: function () {
       console.log("addCube");
-      const boxGeo = new THREE.BoxGeometry(
-        window.innerWidth * 0.15,
-        window.innerHeight * 0.25,
-        50
-      );
-      const material = new THREE.MeshBasicMaterial({
-        color: Math.floor(Math.random() * 16777215).toString(16),
-        transparent: true,
-        opacity: 1,
-      });
-      const cube = new THREE.Mesh(boxGeo, material);
-      scene.add(cube);
+      const boxWidth = window.innerWidth * 0.04;
+      const boxheight = window.innerHeight * 0.08;
+
+      const boxX = [
+        -boxWidth,
+        -boxWidth,
+        -boxWidth,
+        0,
+        boxWidth,
+        boxWidth,
+        boxWidth,
+      ];
+      const boxY = [-boxheight, 0, boxheight, 0, -boxheight, 0, boxheight];
+      const boxZ = [0, 0, 0, 0, 0, 0, 0];
+
+      for (let i = 0; i < 7; i++) {
+        const boxGeo = new THREE.BoxGeometry(
+          boxWidth,
+          boxheight,
+          boxheight / 2
+        );
+        boxGeo.translate(boxX[i], boxY[i], boxZ[i]);
+        const material = new THREE.MeshBasicMaterial({
+          color: Math.floor(Math.random() * 16777215).toString(16),
+          transparent: true,
+          opacity: 1,
+        });
+        const cube = new THREE.Mesh(boxGeo, material);
+        scene.add(cube);
+      }
     },
 
     init: function () {
