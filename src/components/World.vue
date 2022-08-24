@@ -238,15 +238,8 @@ export default {
         const object = scene.children[i];
         if (object instanceof THREE.Points) {
           object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
-          if (object.rotation.y % height == height / 2) {
-            active[i] = true;
-            console.log("yay");
-          } else {
-            active[i] = false;
-          }
         }
       }
-      console.log(active);
     },
 
     updateMaterials: function () {
