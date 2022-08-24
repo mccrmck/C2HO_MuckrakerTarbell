@@ -11,10 +11,11 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 100;
+let instanceCount = 1000;
 let ambientLight, pointLight;
 let instanceTargetPosition = [0, 0, 0];
 let instancePositions = [];
+let instanceVelocities = [];
 const dummy = new THREE.Object3D();
 const numParticles = 50;
 let mouseX = 0;
@@ -53,6 +54,12 @@ export default {
         ]);
       }
     },
+    initInstanceVelocities: function () {
+      instanceVelocities = [];
+      for (let i = 0; i < instanceCount; i++) {
+        instanceVelocities.push([0, 0, 0]);
+      }
+    },
     addLights: function () {
       console.log("addLights");
 
@@ -82,6 +89,7 @@ export default {
       console.log("addInstancedMesh");
 
       this.fillRandomInstancePositions();
+      this.initInstanceVelocities();
 
       let box = new THREE.BoxGeometry(10, 10, 10);
 
@@ -102,7 +110,9 @@ export default {
 
     updateInstancedMesh: function () {
       const time = Date.now() * 0.0005;
-      const uForce = 0.001;
+      const uForce = 4;
+      const uDamp = 0.9999;
+      const uMaxVel = 10;
       for (let i = 0; i < instanceCount; i++) {
         //update positions
 
@@ -117,14 +127,24 @@ export default {
         let acc = normDir.multiplyScalar(uForce);
         acc = acc.divideScalar(dist * 50 * (dist * 50) + 1.0);
 
-        // oVelocity = iVelocity + acc;
-        // oVelocity *= uDamp;
-        // oVelocity = clamp(oVelocity, vec3(-uMaxVel), vec3(uMaxVel));
-        // oPosition = iPosition + oVelocity;
+        let [vx, vy, vz] = instanceVelocities[i];
+        const iVelocity = new THREE.Vector3(vx, vy, vz);
+        let oVelocity = iVelocity.add(acc);
+        oVelocity = oVelocity.multiplyScalar(uDamp);
+        let minVel = new THREE.Vector3(uMaxVel, uMaxVel, uMaxVel);
+        minVel = minVel.multiplyScalar(-1);
+        let maxVel = new THREE.Vector3(uMaxVel, uMaxVel, uMaxVel);
+        oVelocity = oVelocity.clamp(minVel, maxVel);
+        let oPosition = iPosition.add(oVelocity);
+        // update instance position buffer
+        instancePositions[i] = [oPosition.x, oPosition.y, oPosition.z];
+        [ix, iy, iz] = instancePositions[i];
+        // update instance velocities
+        instanceVelocities[i] = [oVelocity.x, oVelocity.y, oVelocity.z];
 
-        if (i == 0) {
-          // console.log(acc);
-        }
+        // if (i == 0) {
+        //   console.log([oPosition.x, oPosition.y, oPosition.z]);
+        // }
 
         dummy.position.set(ix, iy, iz);
 
