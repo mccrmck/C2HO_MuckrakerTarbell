@@ -11,6 +11,10 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
+let instanceCount = 100;
+let ambientLight, pointLight;
+let instanceTargetPosition = [0, 0, 0];
+let instancePositions = [];
 const dummy = new THREE.Object3D();
 const numParticles = 1000;
 let mouseX = 0;
@@ -32,28 +36,84 @@ export default {
     this.animate();
   },
   methods: {
+    scale: function (x, inLow, inHigh, outLow, outHigh) {
+      return ((x - inLow) * (outHigh - outLow)) / (inHigh - inLow) + outLow;
+    },
+    randFloatInRange: function (from, to) {
+      return this.scale(Math.random(), 0, 1, from, to);
+    },
+
+    fillRandomInstancePositions: function () {
+      instancePositions = [];
+      for (let i = 0; i < instanceCount; i++) {
+        instancePositions.push([
+          this.randFloatInRange(-1000, 1000),
+          this.randFloatInRange(-1000, 1000),
+          this.randFloatInRange(-1000, 1000),
+        ]);
+      }
+    },
+    addLights: function () {
+      console.log("addLights");
+
+      ambientLight = new THREE.AmbientLight(0xffffff);
+      scene.add(ambientLight);
+
+      const spotLight = new THREE.SpotLight(0xffffff);
+      spotLight.position.set(100, 1000, 100);
+
+      spotLight.castShadow = true;
+
+      spotLight.shadow.mapSize.width = 1024;
+      spotLight.shadow.mapSize.height = 1024;
+
+      spotLight.shadow.camera.near = 500;
+      spotLight.shadow.camera.far = 4000;
+      spotLight.shadow.camera.fov = 30;
+
+      scene.add(spotLight);
+
+      pointLight = new THREE.PointLight(0xffffff, 1);
+      pointLight.position.y = 500;
+      scene.add(pointLight);
+    },
+
     addInstancedMesh: function () {
       console.log("addInstancedMesh");
 
-      let count = 1000;
+      this.fillRandomInstancePositions();
 
-      let sphere = new THREE.SphereGeometry({ radius: 100 });
+      let box = new THREE.BoxGeometry(10, 10, 10);
 
-      let metalMaterial = new THREE.MeshStandardMaterial({
-        metalness: 1,
-        roughness: 0,
-        color: new THREE.Color(0xff0000),
+      let phongMaterial = new THREE.MeshPhongMaterial({
+        color: 0x00a2ff,
+        shininess: 100,
+        reflectivity: 1,
       });
 
-      instancedMesh = new THREE.InstancedMesh(sphere, metalMaterial, count);
+      instancedMesh = new THREE.InstancedMesh(
+        box,
+        phongMaterial,
+        instanceCount
+      );
       instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
       scene.add(instancedMesh);
     },
 
     updateInstancedMesh: function () {
-      dummy.position.set(0, 0, 0);
-      dummy.updateMatrix();
-      instancedMesh.setMatrixAt(0, dummy.matrix);
+      const time = Date.now() * 0.0005;
+      for (let i = 0; i < instanceCount; i++) {
+        //update positions
+
+        let [x, y, z] = instancePositions[i];
+
+        dummy.position.set(x, y, z);
+
+        // update rotations
+        dummy.rotation.set(Math.cos(i + time), Math.sin(i + time), 0);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
       instancedMesh.instanceMatrix.needsUpdate = true;
     },
 
