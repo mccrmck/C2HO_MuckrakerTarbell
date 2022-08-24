@@ -132,21 +132,23 @@ export default {
       requestAnimationFrame(this.animate);
       this.renderScene();
     },
-    renderScene: function () {
-      const time = Date.now() * 0.00005;
-
+    updateCamera: function () {
       camera.position.x += (mouseX - camera.position.x) * cameraMoveSpeed;
       camera.position.y += (-mouseY - camera.position.y) * cameraMoveSpeed;
-
       camera.lookAt(scene.position);
+    },
+    updateParticles: function () {
+      const time = Date.now() * 0.00005;
 
       for (let i = 0; i < scene.children.length; i++) {
         const object = scene.children[i];
-
         if (object instanceof THREE.Points) {
           object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
         }
       }
+    },
+    updateMaterials: function () {
+      const time = Date.now() * 0.00005;
 
       for (let i = 0; i < materials.length; i++) {
         const color = parameters[i][0];
@@ -154,6 +156,11 @@ export default {
         const h = ((360 * (color[0] + time)) % 360) / 360;
         materials[i].color.setHSL(h, color[1], color[2]);
       }
+    },
+    renderScene: function () {
+      this.updateCamera();
+      this.updateParticles();
+      this.updateMaterials();
 
       renderer.render(scene, camera);
     },
