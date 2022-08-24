@@ -144,7 +144,34 @@ export default {
     addCCHO: function () {
       console.log("addCCHO");
       this.addSpheres();
+      this.addTorus();
       this.addCube();
+    },
+
+    addTorus: function () {
+      console.log("addTorus");
+      const tColor = () => Math.floor(Math.random() * 16777215).toString(16);
+      const tXY = [-0.125, -0.25];
+
+      for (let i = 0; i < 2; i++) {
+        const torusGeo = new THREE.TorusGeometry(
+          100,
+          20,
+          20,
+          12,
+          Math.PI * 1.1
+        );
+        torusGeo.rotateZ(Math.PI / 2);
+        torusGeo.translate(window.innerWidth * tXY[i], 0, 0);
+        const material = new THREE.MeshBasicMaterial({
+          color: "#" + tColor(),
+          transparent: true,
+          opacity: 1,
+          shadowSide: THREE.BackSide,
+        });
+        const torus = new THREE.Mesh(torusGeo, material);
+        scene.add(torus);
+      }
     },
 
     addSpheres: function () {
@@ -152,7 +179,7 @@ export default {
       const sphereX = [-400, -200, 300];
       const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 2; i < 3; i++) {
         let sphereGeo = new THREE.SphereGeometry(150, 50, 50, 0, spherePhi[i]);
         sphereGeo.translate(sphereX[i], 0, 0);
         let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
@@ -168,18 +195,37 @@ export default {
 
     addCube: function () {
       console.log("addCube");
-      const boxGeo = new THREE.BoxGeometry(
-        window.innerWidth * 0.15,
-        window.innerHeight * 0.25,
-        50
-      );
-      const material = new THREE.MeshBasicMaterial({
-        color: Math.floor(Math.random() * 16777215).toString(16),
-        transparent: true,
-        opacity: 1,
-      });
-      const cube = new THREE.Mesh(boxGeo, material);
-      scene.add(cube);
+      const boxWidth = window.innerWidth * 0.04;
+      const boxheight = window.innerHeight * 0.08;
+      const boxColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
+
+      const boxX = [
+        -boxWidth,
+        -boxWidth,
+        -boxWidth,
+        0,
+        boxWidth,
+        boxWidth,
+        boxWidth,
+      ];
+      const boxY = [-boxheight, 0, boxheight, 0, -boxheight, 0, boxheight];
+      const boxZ = [0, 0, 0, 0, 0, 0, 0];
+
+      for (let i = 0; i < 7; i++) {
+        const boxGeo = new THREE.BoxGeometry(
+          boxWidth,
+          boxheight,
+          boxheight / 2
+        );
+        boxGeo.translate(boxX[i], boxY[i], boxZ[i]);
+        const material = new THREE.MeshBasicMaterial({
+          color: boxColor,
+          transparent: true,
+          opacity: 1,
+        });
+        const cube = new THREE.Mesh(boxGeo, material);
+        scene.add(cube);
+      }
     },
 
     init: function () {
