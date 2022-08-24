@@ -11,6 +11,9 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
+let instanceCount = 100;
+let ambientLight, pointLight, pointLight2, pointLight3;
+let textureEquirec;
 const dummy = new THREE.Object3D();
 const numParticles = 100;
 let mouseX = 0;
@@ -31,28 +34,66 @@ export default {
     this.animate();
   },
   methods: {
+    addLights: function () {
+      console.log("addLights");
+
+      ambientLight = new THREE.AmbientLight(0xffffff);
+      scene.add(ambientLight);
+
+      const spotLight = new THREE.SpotLight(0xffffff);
+      spotLight.position.set(100, 1000, 100);
+
+      spotLight.castShadow = true;
+
+      spotLight.shadow.mapSize.width = 1024;
+      spotLight.shadow.mapSize.height = 1024;
+
+      spotLight.shadow.camera.near = 500;
+      spotLight.shadow.camera.far = 4000;
+      spotLight.shadow.camera.fov = 30;
+
+      scene.add(spotLight);
+
+      pointLight = new THREE.PointLight(0xffffff, 1);
+      pointLight.position.y = 500;
+      scene.add(pointLight);
+    },
+
     addInstancedMesh: function () {
       console.log("addInstancedMesh");
 
-      let count = 1000;
+      let box = new THREE.BoxGeometry(10, 10, 10);
 
-      let sphere = new THREE.SphereGeometry({ radius: 100 });
-
-      let metalMaterial = new THREE.MeshStandardMaterial({
-        metalness: 1,
-        roughness: 0,
-        color: new THREE.Color(0xff0000),
+      let phongMaterial = new THREE.MeshPhongMaterial({
+        color: 0x00a2ff,
+        shininess: 100,
+        reflectivity: 1,
       });
 
-      instancedMesh = new THREE.InstancedMesh(sphere, metalMaterial, count);
+      instancedMesh = new THREE.InstancedMesh(
+        box,
+        phongMaterial,
+        instanceCount
+      );
       instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
       scene.add(instancedMesh);
     },
 
     updateInstancedMesh: function () {
-      dummy.position.set(0, 0, 0);
-      dummy.updateMatrix();
-      instancedMesh.setMatrixAt(0, dummy.matrix);
+      const time = Date.now() * 0.0005;
+      for (let i = 0; i < instanceCount; i++) {
+        //update positions
+        dummy.position.set(
+          Math.sin(i + time) * 100,
+          Math.cos(i + time) * 100,
+          Math.sin(i + time) * 100
+        );
+
+        // update rotations
+        dummy.rotation.set(Math.cos(i + time), Math.sin(i + time), 0);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
       instancedMesh.instanceMatrix.needsUpdate = true;
     },
 
@@ -156,6 +197,7 @@ export default {
       this.addParticles();
       this.addCCHO();
       this.addInstancedMesh();
+      this.addLights();
 
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
