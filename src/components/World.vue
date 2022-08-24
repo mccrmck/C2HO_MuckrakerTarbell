@@ -11,7 +11,7 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 1000;
+let instanceCount = 300;
 let ambientLight, pointLight;
 let phongMaterial;
 let instanceTargetPosition = [0, 0, 0];
@@ -28,6 +28,14 @@ const parallaxCoeff = 0.3;
 let parameters;
 let materials = [];
 let active = [];
+
+let origins = {
+  c0: [window.innerWidth * -0.18, 0, -15],
+  c1: [window.innerWidth * -0.105, 0, -5],
+  h: [0, 0, 0],
+  o: [window.innerWidth * 0.13, 0, 18],
+};
+
 export default {
   name: "World",
   data() {
@@ -219,31 +227,44 @@ export default {
 
     addCCHO: function () {
       console.log("addCCHO");
-      this.addSpheres();
+      this.addSphere();
       this.addTorus();
       this.addCube();
     },
 
+    randColor: function () {
+      return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    },
+
     addTorus: function () {
       console.log("addTorus");
-      const radius = 100;
-      const rSegs = 20;
-      const tColor = () => Math.floor(Math.random() * 16777215).toString(16);
-      const width = window.innerWidth;
-      const tXY = [width * -0.3, width * -0.15];
 
       for (let i = 0; i < 2; i++) {
+        const oKey = ["c1", "c2"][i];
         const torusGeo = new THREE.TorusGeometry(
-          radius,
+          100,
+          30,
+          30,
           20,
-          rSegs,
-          12,
           Math.PI * 1.2
         );
         torusGeo.rotateZ(Math.PI / 2.5);
-        torusGeo.translate(tXY[i], 0, 0);
-        const material = new THREE.MeshBasicMaterial({
-          color: "#" + tColor(),
+        torusGeo.rotateY(Math.PI * 0.2);
+        if (i == 0) {
+          torusGeo.translate(
+            origins["c0"][0],
+            origins["c0"][1],
+            origins["c0"][2]
+          );
+        } else {
+          torusGeo.translate(
+            origins["c1"][0],
+            origins["c1"][1],
+            origins["c1"][2]
+          );
+        }
+        const material = new THREE.MeshPhongMaterial({
+          color: this.randColor(),
           transparent: true,
           opacity: 1,
           shadowSide: THREE.BackSide,
@@ -254,48 +275,52 @@ export default {
       }
     },
 
-    addSpheres: function () {
+    addSphere: function () {
       console.log("addSpheres");
-      const space = window.innerWidth * 0.2;
-      const sphereX = [-space * 2, -space, space];
-      const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
-
-      for (let i = 2; i < 3; i++) {
-        let sphereGeo = new THREE.SphereGeometry(130, 50, 50, 0, spherePhi[i]);
-        sphereGeo.translate(sphereX[i], 0, 0);
-        let randCol = () => Math.floor(Math.random() * 16777215).toString(16);
-        let material = new THREE.MeshBasicMaterial({
-          color: "#" + randCol(),
-          transparent: true,
-          opacity: 1,
-        });
-        let sphere = new THREE.Mesh(sphereGeo, material);
-        scene.add(sphere);
-      }
+      let sphereGeo = new THREE.SphereGeometry(130, 50, 50, 0);
+      sphereGeo.translate(origins["o"][0], origins["o"][1], origins["o"][2]);
+      let material = new THREE.MeshPhongMaterial({
+        color: this.randColor(),
+        transparent: true,
+        opacity: 1,
+      });
+      let sphere = new THREE.Mesh(sphereGeo, material);
+      scene.add(sphere);
     },
 
     addCube: function () {
       console.log("addCube");
       const boxWidth = window.innerWidth * 0.05;
       const boxheight = window.innerHeight * 0.08;
-      const boxColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
       const boxX = [
         -boxWidth,
         -boxWidth,
         -boxWidth,
-        0,
+        origins["h"][0],
         boxWidth,
         boxWidth,
         boxWidth,
       ];
-      const boxY = [-boxheight, 0, boxheight, 0, -boxheight, 0, boxheight];
+      const boxY = [
+        -boxheight,
+        0,
+        boxheight,
+        origins["h"][1],
+        -boxheight,
+        0,
+        boxheight,
+      ];
+      const color = this.randColor();
 
       for (let i = 0; i < 7; i++) {
         const boxGeo = new THREE.BoxGeometry(boxWidth, boxheight, boxheight);
         boxGeo.translate(boxX[i], boxY[i], 0);
-        const material = new THREE.MeshBasicMaterial({
-          color: boxColor,
+        boxGeo.rotateY(Math.PI * 0.1);
+        const material = new THREE.MeshPhongMaterial({
+          color: color,
+          reflectivity: 1,
+          specular: 0xffffff,
           transparent: true,
           opacity: 1,
         });
