@@ -30,6 +30,49 @@ export default {
     this.animate();
   },
   methods: {
+    addParticles: function () {
+      console.log("addParticles");
+      const geometry = new THREE.BufferGeometry();
+      const vertices = [];
+
+      for (let i = 0; i < numParticles; i++) {
+        const x = Math.random() * 2000 - 1000;
+        const y = Math.random() * 2000 - 1000;
+        const z = Math.random() * 2000 - 1000;
+
+        vertices.push(x, y, z);
+      }
+
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(vertices, 3)
+      );
+
+      parameters = [[[1.0, 0.2, 0.5], "yo", 20]];
+
+      for (let i = 0; i < parameters.length; i++) {
+        const color = parameters[i][0];
+        // const sprite = parameters[i][1];
+        const size = parameters[i][2];
+
+        materials[i] = new THREE.PointsMaterial({
+          size: size,
+          //   map: sprite,
+          blending: THREE.AdditiveBlending,
+          depthTest: false,
+          transparent: true,
+        });
+        materials[i].color.setHSL(color[0], color[1], color[2]);
+
+        const particles = new THREE.Points(geometry, materials[i]);
+
+        particles.rotation.x = Math.random() * 6;
+        particles.rotation.y = Math.random() * 6;
+        particles.rotation.z = Math.random() * 6;
+
+        scene.add(particles);
+      }
+    },
     addCCHO: function () {
       console.log("addCCHO");
       this.addSpheres();
@@ -71,47 +114,7 @@ export default {
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-      const geometry = new THREE.BufferGeometry();
-      const vertices = [];
-
-      for (let i = 0; i < numParticles; i++) {
-        const x = Math.random() * 2000 - 1000;
-        const y = Math.random() * 2000 - 1000;
-        const z = Math.random() * 2000 - 1000;
-
-        vertices.push(x, y, z);
-      }
-
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(vertices, 3)
-      );
-
-      parameters = [[[1.0, 0.2, 0.5], "yo", 20]];
-
-      for (let i = 0; i < parameters.length; i++) {
-        const color = parameters[i][0];
-        const sprite = parameters[i][1];
-        const size = parameters[i][2];
-
-        materials[i] = new THREE.PointsMaterial({
-          size: size,
-          //   map: sprite,
-          blending: THREE.AdditiveBlending,
-          depthTest: false,
-          transparent: true,
-        });
-        materials[i].color.setHSL(color[0], color[1], color[2]);
-
-        const particles = new THREE.Points(geometry, materials[i]);
-
-        particles.rotation.x = Math.random() * 6;
-        particles.rotation.y = Math.random() * 6;
-        particles.rotation.z = Math.random() * 6;
-
-        scene.add(particles);
-      }
-
+      this.addParticles();
       this.addCCHO();
 
       renderer = new THREE.WebGLRenderer();
@@ -142,12 +145,6 @@ export default {
 
         if (object instanceof THREE.Points) {
           object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
-          //   object.rotation.x =
-          //   object.rotation.y = time;
-          //   object.position.x += (Math.random() * 2 - 1) * 5;
-          //   object.position.y += (Math.random() * 2 - 1) * 5;
-          //   object.position.z += (Math.random() * 2 - 1) * 5;
-          //TODO: Points is a mesh that contains the vertices. We need to move the vertices and update the mesh.
         }
       }
 
