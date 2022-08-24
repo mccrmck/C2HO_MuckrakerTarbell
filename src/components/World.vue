@@ -11,24 +11,20 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let targetSphere, targetSphereGeometry;
-let instanceCount = 300;
+let instanceCount = 1000;
 let ambientLight, pointLight;
 let phongMaterial;
+let cchoColors = ["#00A833", "#295F98", "#FE0000", "#FF7F00"];
 let instanceTargetPosition = [0, 0, 0];
 let instancePositions = [];
 let instanceVelocities = [];
 const dummy = new THREE.Object3D();
-const numParticles = 50;
 let mouseX = 0;
 let mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 const cameraMoveSpeed = 0.1;
-const parallaxCoeff = 0.3;
-let parameters;
-let materials = [];
-let active = [];
+const parallaxCoeff = 1.5;
 
 let origins = {
   c0: [window.innerWidth * -0.18, 0, -15],
@@ -97,8 +93,8 @@ export default {
     },
 
     moveInstanceTarget: function () {
-      const mult = 10;
-      const space = 500;
+      const mult = 50;
+      const space = 300;
       const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
       let targetX = clamp(
         this.randFloatInRange(-mult, mult) + instanceTargetPosition[0],
@@ -119,19 +115,6 @@ export default {
       // console.log(instanceTargetPosition);
     },
 
-    addTargetSpehere: function () {
-      targetSphereGeometry = new THREE.SphereGeometry(50, 50, 50, 0);
-      targetSphere = new THREE.Mesh(targetSphereGeometry, phongMaterial);
-      this.moveTargetSphere();
-      scene.add(targetSphere);
-    },
-
-    moveTargetSphere: function () {
-      let [x, y, z] = instanceTargetPosition;
-      let posVec = new THREE.Vector3(x, y, z);
-      targetSphere.position(posVec);
-    },
-
     addInstancedMesh: function () {
       console.log("addInstancedMesh");
 
@@ -142,7 +125,7 @@ export default {
 
       phongMaterial = new THREE.MeshPhongMaterial({
         color: 0xffffff,
-        shininess: 100,
+        shininess: 50,
         reflectivity: 1,
       });
 
@@ -157,25 +140,21 @@ export default {
 
     updateInstancedMesh: function () {
       const time = Date.now() * 0.0005;
-      const uForce = 50;
-      const uDamp = 0.9999;
-      const uMaxVel = 90;
-      const baseColor = [0.2, 1, 0.46];
+      const uForce = 100;
+      const uDamp = 0.999;
+      const uMaxVel = 100;
+      const baseColor0 = [0, 168, 51];
+      const baseColor1 = [41, 95, 152];
+      const baseColor2 = [254, 0, 0];
+      const baseColor3 = [255, 127, 0];
+      let colorPalette = [baseColor0, baseColor1, baseColor2, baseColor3];
       for (let i = 0; i < instanceCount; i++) {
         //update positions
         let [ix, iy, iz] = instancePositions[i];
         const iPosition = new THREE.Vector3(ix, iy, iz);
-
-        if (i == 0) {
-          // console.log(instanceTargetPosition);
-        }
-
         let [ux, uy, uz] = instanceTargetPosition;
         const uTarget = new THREE.Vector3(ux, uy, uz);
         let dir = uTarget.sub(iPosition);
-        if (i == 0) {
-          // console.log(instanceTargetPosition);
-        }
         let normDir = dir.normalize();
         let dist = normDir.length();
         let acc = normDir.multiplyScalar(uForce);
@@ -205,20 +184,21 @@ export default {
         instancedMesh.setMatrixAt(i, dummy.matrix);
 
         // update colors
+        let baseColor = colorPalette[i % 4];
         let [cx, cy, cz] = baseColor;
-        let baseColorVec = new THREE.Vector3(cx, cy, cz);
-        let oColor = baseColorVec.multiplyScalar(
-          oVelocity.length() ** 3 + 0.01
-        );
+        let baseColorVec = new THREE.Vector3(cx / 255, cy / 255, cz / 255);
+        let colorMult = this.scale(oVelocity.length(), 0, 6, 0, 1);
+
+        let oColor = baseColorVec.multiplyScalar(colorMult ** 4);
         oColor = oColor.clamp(
           new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(255, 255, 255)
+          new THREE.Vector3(1, 1, 1)
         );
 
         let instanceColor = new THREE.Color(
-          Math.round(oColor.x) / 255,
-          Math.round(oColor.y) / 255,
-          Math.round(oColor.z) / 255
+          Math.round(oColor.x),
+          Math.round(oColor.y),
+          Math.round(oColor.z)
         );
 
         instancedMesh.setColorAt(i, instanceColor);
@@ -226,51 +206,6 @@ export default {
       // mark dirty
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.instanceColor.needsUpdate = true;
-    },
-
-    addParticles: function () {
-      console.log("addParticles");
-      const geometry = new THREE.BufferGeometry();
-      const vertices = [];
-
-      for (let i = 0; i < numParticles; i++) {
-        const x = Math.random() * 2000 - 1000;
-        const y = Math.random() * 2000 - 1000;
-        const z = Math.random() * 2000 - 1000;
-
-        vertices.push(x, y, z);
-        active.push(false);
-      }
-
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(vertices, 3)
-      );
-
-      parameters = [[[1.0, 0.2, 0.5], "yo", 20]];
-
-      for (let i = 0; i < parameters.length; i++) {
-        const color = parameters[i][0];
-        // const sprite = parameters[i][1];
-        const size = parameters[i][2];
-
-        materials[i] = new THREE.PointsMaterial({
-          size: size,
-          //   map: sprite,
-          blending: THREE.AdditiveBlending,
-          depthTest: false,
-          transparent: true,
-        });
-        materials[i].color.setHSL(color[0], color[1], color[2]);
-
-        const particles = new THREE.Points(geometry, materials[i]);
-
-        particles.rotation.x = Math.random() * 6;
-        particles.rotation.y = Math.random() * 6;
-        particles.rotation.z = Math.random() * 6;
-
-        scene.add(particles);
-      }
     },
 
     addCCHO: function () {
@@ -312,7 +247,8 @@ export default {
           );
         }
         const material = new THREE.MeshPhongMaterial({
-          color: this.randColor(),
+          // color: this.randColor(),
+          color: cchoColors[i],
           transparent: true,
           opacity: 1,
           shadowSide: THREE.BackSide,
@@ -328,7 +264,8 @@ export default {
       let sphereGeo = new THREE.SphereGeometry(130, 50, 50, 0);
       sphereGeo.translate(origins["o"][0], origins["o"][1], origins["o"][2]);
       let material = new THREE.MeshPhongMaterial({
-        color: this.randColor(),
+        // color: this.randColor(),
+        color: cchoColors[3],
         transparent: true,
         opacity: 1,
       });
@@ -359,7 +296,8 @@ export default {
         0,
         boxheight,
       ];
-      const color = this.randColor();
+      // const color = this.randColor();
+      const color = cchoColors[2];
 
       for (let i = 0; i < 7; i++) {
         const boxGeo = new THREE.BoxGeometry(boxWidth, boxheight, boxheight);
@@ -383,7 +321,7 @@ export default {
         origins["o"][1],
         Math.abs(origins["o"][2])
       );
-      let red = new THREE.Color(1, 0, 0);
+      let activeColor = new THREE.Color(0x295f98);
       origin = center;
 
       for (let i = 0; i < instanceCount; i++) {
@@ -394,7 +332,7 @@ export default {
         const distance = v.distanceTo(origin);
 
         if (distance < radius) {
-          instancedMesh.setColorAt(i, red);
+          instancedMesh.setColorAt(i, activeColor);
         }
       }
       instancedMesh.instanceColor.needsUpdate = true;
@@ -412,8 +350,6 @@ export default {
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-      // this.addParticles();
-      this.addTargetSpehere();
       this.addCCHO();
       this.addInstancedMesh();
       this.addLights();
@@ -441,35 +377,11 @@ export default {
       camera.lookAt(scene.position);
     },
 
-    updateParticles: function () {
-      const time = Date.now() * 0.00005;
-
-      for (let i = 0; i < scene.children.length; i++) {
-        const object = scene.children[i];
-        if (object instanceof THREE.Points) {
-          object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
-        }
-      }
-    },
-
-    updateMaterials: function () {
-      const time = Date.now() * 0.00005;
-
-      for (let i = 0; i < materials.length; i++) {
-        const color = parameters[i][0];
-        let h = ((360 * (color[0] + time)) % 360) / 360;
-        materials[i].color.setHSL(h, color[1], color[2]);
-      }
-    },
-
     renderScene: function () {
       this.updateCamera();
-      // this.updateParticles();
-      this.updateMaterials();
       this.updateInstancedMesh();
       this.checkRadius();
       this.moveInstanceTarget();
-      this.moveTargetSphere();
 
       renderer.render(scene, camera);
     },
