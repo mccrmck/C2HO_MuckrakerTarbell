@@ -16,7 +16,7 @@ let ambientLight, pointLight;
 let instanceTargetPosition = [0, 0, 0];
 let instancePositions = [];
 const dummy = new THREE.Object3D();
-const numParticles = 1000;
+const numParticles = 50;
 let mouseX = 0;
 let mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
@@ -174,7 +174,8 @@ export default {
       const radius = 100;
       const rSegs = 20;
       const tColor = () => Math.floor(Math.random() * 16777215).toString(16);
-      const tXY = [-0.125, -0.25];
+      const width = window.innerWidth;
+      const tXY = [width * -0.3, width * -0.15];
 
       for (let i = 0; i < 2; i++) {
         const torusGeo = new THREE.TorusGeometry(
@@ -182,10 +183,10 @@ export default {
           20,
           rSegs,
           12,
-          Math.PI * 1.1
+          Math.PI * 1.2
         );
-        torusGeo.rotateZ(Math.PI / 2);
-        torusGeo.translate(window.innerWidth * tXY[i], 0, 0);
+        torusGeo.rotateZ(Math.PI / 2.5);
+        torusGeo.translate(tXY[i], 0, 0);
         const material = new THREE.MeshBasicMaterial({
           color: "#" + tColor(),
           transparent: true,
@@ -200,7 +201,8 @@ export default {
 
     addSpheres: function () {
       console.log("addSpheres");
-      const sphereX = [-400, -200, 300];
+      const space = window.innerWidth * 0.2;
+      const sphereX = [-space * 2, -space, space];
       const spherePhi = [Math.PI / 3, Math.PI / 3, Math.PI * 2];
 
       for (let i = 2; i < 3; i++) {
@@ -219,7 +221,7 @@ export default {
 
     addCube: function () {
       console.log("addCube");
-      const boxWidth = window.innerWidth * 0.04;
+      const boxWidth = window.innerWidth * 0.05;
       const boxheight = window.innerHeight * 0.08;
       const boxColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
@@ -294,7 +296,7 @@ export default {
 
     updateParticles: function () {
       const time = Date.now() * 0.00005;
-      const height = window.innerHeight;
+
       for (let i = 0; i < scene.children.length; i++) {
         const object = scene.children[i];
         if (object instanceof THREE.Points) {
