@@ -102,12 +102,31 @@ export default {
 
     updateInstancedMesh: function () {
       const time = Date.now() * 0.0005;
+      const uForce = 0.001;
       for (let i = 0; i < instanceCount; i++) {
         //update positions
 
-        let [x, y, z] = instancePositions[i];
+        let [ix, iy, iz] = instancePositions[i];
+        const iPosition = new THREE.Vector3(ix, iy, iz);
+        let [ux, uy, uz] = instanceTargetPosition;
+        const uTarget = new THREE.Vector3(ux, uy, uz);
 
-        dummy.position.set(x, y, z);
+        let dir = uTarget.sub(iPosition);
+        let normDir = dir.normalize();
+        let dist = normDir.length();
+        let acc = normDir.multiplyScalar(uForce);
+        acc = acc.divideScalar(dist * 50 * (dist * 50) + 1.0);
+
+        // oVelocity = iVelocity + acc;
+        // oVelocity *= uDamp;
+        // oVelocity = clamp(oVelocity, vec3(-uMaxVel), vec3(uMaxVel));
+        // oPosition = iPosition + oVelocity;
+
+        if (i == 0) {
+          // console.log(acc);
+        }
+
+        dummy.position.set(ix, iy, iz);
 
         // update rotations
         dummy.rotation.set(Math.cos(i + time), Math.sin(i + time), 0);
