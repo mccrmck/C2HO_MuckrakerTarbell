@@ -11,6 +11,7 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
+const dummy = new THREE.Object3D();
 const numParticles = 100;
 let mouseX = 0;
 let mouseY = 0;
@@ -33,18 +34,26 @@ export default {
     addInstancedMesh: function () {
       console.log("addInstancedMesh");
 
-      let count = 100;
+      let count = 1000;
 
-      let sphere = new THREE.SphereGeometry();
+      let sphere = new THREE.SphereGeometry({ radius: 100 });
 
       let metalMaterial = new THREE.MeshStandardMaterial({
         metalness: 1,
         roughness: 0,
+        color: new THREE.Color(0xff0000),
       });
 
       instancedMesh = new THREE.InstancedMesh(sphere, metalMaterial, count);
       instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
       scene.add(instancedMesh);
+    },
+
+    updateInstancedMesh: function () {
+      dummy.position.set(0, 0, 0);
+      dummy.updateMatrix();
+      instancedMesh.setMatrixAt(0, dummy.matrix);
+      instancedMesh.instanceMatrix.needsUpdate = true;
     },
 
     addParticles: function () {
@@ -215,6 +224,7 @@ export default {
       this.updateCamera();
       this.updateParticles();
       this.updateMaterials();
+      this.updateInstancedMesh();
 
       renderer.render(scene, camera);
     },
