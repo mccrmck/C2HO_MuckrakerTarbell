@@ -235,15 +235,10 @@ export default {
         boxWidth,
       ];
       const boxY = [-boxheight, 0, boxheight, 0, -boxheight, 0, boxheight];
-      const boxZ = [0, 0, 0, 0, 0, 0, 0];
 
       for (let i = 0; i < 7; i++) {
-        const boxGeo = new THREE.BoxGeometry(
-          boxWidth,
-          boxheight,
-          boxheight / 2
-        );
-        boxGeo.translate(boxX[i], boxY[i], boxZ[i]);
+        const boxGeo = new THREE.BoxGeometry(boxWidth, boxheight, boxheight);
+        boxGeo.translate(boxX[i], boxY[i], 0);
         const material = new THREE.MeshBasicMaterial({
           color: boxColor,
           transparent: true,
