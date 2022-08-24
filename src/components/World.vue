@@ -11,7 +11,8 @@ import * as THREE from "three";
 <script>
 let renderer, scene, camera;
 let instancedMesh;
-let instanceCount = 3000;
+let targetSphere, targetSphereGeometry;
+let instanceCount = 300;
 let ambientLight, pointLight;
 let phongMaterial;
 let instanceTargetPosition = [0, 0, 0];
@@ -42,6 +43,7 @@ export default {
     return {};
   },
   mounted() {
+    this.moveInstanceTarget();
     this.init();
     this.animate();
   },
@@ -94,6 +96,42 @@ export default {
       scene.add(pointLight);
     },
 
+    moveInstanceTarget: function () {
+      const mult = 10;
+      const space = 500;
+      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+      let targetX = clamp(
+        this.randFloatInRange(-mult, mult) + instanceTargetPosition[0],
+        -space,
+        space
+      );
+      let targetY = clamp(
+        this.randFloatInRange(-mult, mult) + instanceTargetPosition[1],
+        -space,
+        space
+      );
+      let targetZ = clamp(
+        this.randFloatInRange(-mult, mult) + instanceTargetPosition[2],
+        -space,
+        space
+      );
+      instanceTargetPosition = [targetX, targetY, targetZ];
+      // console.log(instanceTargetPosition);
+    },
+
+    addTargetSpehere: function () {
+      targetSphereGeometry = new THREE.SphereGeometry(50, 50, 50, 0);
+      targetSphere = new THREE.Mesh(targetSphereGeometry, phongMaterial);
+      this.moveTargetSphere();
+      scene.add(targetSphere);
+    },
+
+    moveTargetSphere: function () {
+      let [x, y, z] = instanceTargetPosition;
+      let posVec = new THREE.Vector3(x, y, z);
+      targetSphere.position(posVec);
+    },
+
     addInstancedMesh: function () {
       console.log("addInstancedMesh");
 
@@ -119,17 +157,25 @@ export default {
 
     updateInstancedMesh: function () {
       const time = Date.now() * 0.0005;
-      const uForce = 6;
+      const uForce = 50;
       const uDamp = 0.9999;
-      const uMaxVel = 30;
+      const uMaxVel = 90;
       const baseColor = [0.2, 1, 0.46];
       for (let i = 0; i < instanceCount; i++) {
         //update positions
         let [ix, iy, iz] = instancePositions[i];
         const iPosition = new THREE.Vector3(ix, iy, iz);
+
+        if (i == 0) {
+          // console.log(instanceTargetPosition);
+        }
+
         let [ux, uy, uz] = instanceTargetPosition;
         const uTarget = new THREE.Vector3(ux, uy, uz);
         let dir = uTarget.sub(iPosition);
+        if (i == 0) {
+          // console.log(instanceTargetPosition);
+        }
         let normDir = dir.normalize();
         let dist = normDir.length();
         let acc = normDir.multiplyScalar(uForce);
@@ -151,6 +197,7 @@ export default {
         instanceVelocities[i] = [oVelocity.x, oVelocity.y, oVelocity.z];
         // set position
         dummy.position.set(ix, iy, iz);
+        // dummy.position.set(ux, uy, uz);
 
         // update rotations
         dummy.rotation.set(Math.cos(i + time), Math.sin(i + time), 0);
@@ -161,7 +208,7 @@ export default {
         let [cx, cy, cz] = baseColor;
         let baseColorVec = new THREE.Vector3(cx, cy, cz);
         let oColor = baseColorVec.multiplyScalar(
-          oVelocity.length() ** 10.0 + 0.01
+          oVelocity.length() ** 3 + 0.01
         );
         oColor = oColor.clamp(
           new THREE.Vector3(0, 0, 0),
@@ -176,6 +223,7 @@ export default {
 
         instancedMesh.setColorAt(i, instanceColor);
       }
+      // mark dirty
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.instanceColor.needsUpdate = true;
     },
@@ -365,6 +413,7 @@ export default {
       scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
       // this.addParticles();
+      this.addTargetSpehere();
       this.addCCHO();
       this.addInstancedMesh();
       this.addLights();
@@ -419,6 +468,8 @@ export default {
       this.updateMaterials();
       this.updateInstancedMesh();
       this.checkRadius();
+      this.moveInstanceTarget();
+      this.moveTargetSphere();
 
       renderer.render(scene, camera);
     },
